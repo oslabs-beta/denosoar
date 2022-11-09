@@ -13,9 +13,10 @@ export class Server {
   // an invokable function that streams the data
   stream(){
     this.#ws.on('connection', function(ws: WebSocketClient) {
-      console.log('connected to ws on ' + this.port)
-      setInterval(() => ws.send(JSON.stringify(getMemory())),1000);
-    })
+      ws.on('message', function(e: MessageEvent) {
+        ws.send(JSON.stringify(getMemory()));
+      });
+    });
   }
 
   close(){
