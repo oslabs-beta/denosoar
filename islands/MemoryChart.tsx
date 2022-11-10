@@ -149,7 +149,7 @@ export default function MemoryChart() {
     // Destroy chart and recreate a new type
     if (myChart && param !== currentStyle) {
       currentStyle = param;
-      // console.log(`Current type: ${currentStyle}. Changing to ${param}`);
+
       myChart.destroy();
     }
     changeType(param);
@@ -159,14 +159,14 @@ export default function MemoryChart() {
 
   return (
     <div class="block">
-      <button
+      <button class='border-2 border black'
         onClick={() => {
           changeStyle("line");
         }}
       >
         Line Graph
       </button>
-      <button
+      <button class='border-2 border black'
         onClick={() => {
           changeStyle("bar");
         }}
