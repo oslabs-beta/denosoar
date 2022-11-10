@@ -19,24 +19,13 @@ export default function MemoryChart() {
   // const [data, setData] = useState();
   // const [open, setOpen] = useState(true);
   // const [rssData, setRssData] = useState([])
-
-  // // const rssData: number[] = []
-  // const heapUseedData: number[] = []
-  // const heapTotalData: number[] = []
-  // const externalData: number[] = []
-  // useEffect( () => {
-    
-  //   setRssData ([...rssData, memory.rss])
-  //   heapUseedData.push(memory.heapUsed)
-  //   heapTotalData.push(memory.heapTotal)
-  //   externalData.push(memory.external)
-  //   console.log(rssData)
-  // }, [memory])
   
+
+
 
   let myChart;
 
-
+const [graph, setGraph] = useState('line')
   useEffect(() => {
     // create ws connection with server
     const ws: WebSocketClient = new StandardWebSocketClient(
@@ -49,7 +38,7 @@ export default function MemoryChart() {
     let external: number[] = [0,0,0,0,0,0,0,0,0,0]
     
     myChart = new chartjs.Chart(ctx, {
-      type: "line",
+      type: graph,
       data: {
         labels: [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1],
         datasets: [
@@ -119,11 +108,11 @@ export default function MemoryChart() {
         }
       }
     });
+    
     setInterval(() => {
       ws.send('message', function(){
         console.log('give me the data');
       });
-      console.log('hi');
       myChart.update(0)
     }, 1000)
     ws.on('message', function(e: MessageEvent){
@@ -142,15 +131,10 @@ export default function MemoryChart() {
   }, []);
 
  
-
   return (
     <div>
-      {/* <p>rss: {memory.rss}</p>
-      <p>heapTotal: {memory.heapTotal}</p>
-      <p>heapUsed: {memory.heapUsed}</p>
-      <p>external: {memory.external}</p> */}
 
-      <canvas id="myChart" width="400" height="400"></canvas>
+      <canvas id="myChart"></canvas>
     </div>
   );
 }
