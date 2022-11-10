@@ -2,155 +2,196 @@
 import { MemoryElement } from "../communication/types.ts";
 import { useEffect, useState } from "preact/hooks";
 import { StandardWebSocketClient, WebSocketClient } from "websocket";
-import * as chartjs from "https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"
+import * as chartjs from "https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js";
 
 interface MemoryProps {
   memory: MemoryElement;
 }
 
 export default function MemoryChart() {
-  // const [memory, setMemory] = useState({
- 
-  //   rss: 0,
-  //   heapUsed: 0,
-  //   heapTotal: 0,
-  //   external: 0,
-  // });
-  // const [data, setData] = useState();
-  // const [open, setOpen] = useState(true);
-  // const [rssData, setRssData] = useState([])
-
-  // // const rssData: number[] = []
-  // const heapUseedData: number[] = []
-  // const heapTotalData: number[] = []
-  // const externalData: number[] = []
-  // useEffect( () => {
-    
-  //   setRssData ([...rssData, memory.rss])
-  //   heapUseedData.push(memory.heapUsed)
-  //   heapTotalData.push(memory.heapTotal)
-  //   externalData.push(memory.external)
-  //   console.log(rssData)
-  // }, [memory])
-  
-
   let myChart;
+  let currentStyle = "line";
+  let socketOn = false;
 
+  // Number of points to display on the chart
+  let displaySize = 20;
+  const label: number[] = [];
+  for (let i = 0; i < displaySize; i++) {
+    label.push(i - displaySize);
+  }
 
-  useEffect(() => {
+  function outer() {
     // create ws connection with server
+    console.log("GOT OUTSIDE!");
     const ws: WebSocketClient = new StandardWebSocketClient(
       "ws://127.0.0.1:3000",
     );
-    const ctx = document.getElementById("myChart");
-    let rssData: number[] = [0,0,0,0,0,0,0,0,0,0]
-    let heapUsed: number[] = [0,0,0,0,0,0,0,0,0,0]
-    let heapTotal: number[] = [0,0,0,0,0,0,0,0,0,0]
-    let external: number[] = [0,0,0,0,0,0,0,0,0,0]
-    
-    myChart = new chartjs.Chart(ctx, {
-      type: "line",
-      data: {
-        labels: [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1],
-        datasets: [
-          {
-          label: "RSS",
-          data: [...rssData],
-          backgroundColor: [
-            'rgba(105, 0, 132, .2)',
-          ],
-          borderColor: [
-            'rgba(200, 99, 132, .7)'
-          ],
-          fill: true,
-          borderWidth: 1,
-        },
-        {
-          label: "Heap Total",
-          data: [...heapTotal],
-          backgroundColor: [
-            'rgba(0, 137, 132, .2)',
-          ],
-          borderColor: [
-            'rgba(0, 10, 130, .7)',
-          ],
-          fill: true,
-          borderWidth: 1,
-        },
-        {
-          label: 'Heap Used',
-          data: [...heapUsed],
-          backgroundColor: [
-            'rgba(0, 255, 0, .2)',
-          ],
-          borderColor: [
-            'rgba(0, 153, 0, .7)',
-          ],
-          fill: true,
-          borderWidth: 1,
-          tension: 0.1
-        },
-        {
-          label: 'External',
-          data: [...external],
-          backgroundColor: [
-            'rgba(255, 102, 78, .2)',
-          ],
-          borderColor: [
-            'rgba(255, 0, 127, .7)',
-          ],
-          fill: true,
-          borderWidth: 1,
-          tension: 0.1
-        },
-      ],
-        
-      },
-      options: {
-        scales: {
-          yAxes: {
-            suggestedmax: 6000,
-            suggestedmin: 0,
-            ticks: {
-              stepSize: 1000
-            }
-          }
 
-        }
-      }
+    ws.on("open", function () {
+      setInterval(() => {
+        ws.send("give me data");
+      }, 1000);
     });
-    setInterval(() => {
-      ws.send('message', function(){
-        console.log('give me the data');
-      });
-      console.log('hi');
-      myChart.update(0)
-    }, 1000)
-    ws.on('message', function(e: MessageEvent){
-      console.log('data received')
-      myChart.data.labels = myChart.data.labels.map(x => x+1);
-      myChart.data.datasets[0].data = [...myChart.data.datasets[0].data.slice(1), JSON.parse(e.data).rss/1000];
-      myChart.data.datasets[1].data = [...myChart.data.datasets[1].data.slice(1), JSON.parse(e.data).heapTotal/1000];
-      myChart.data.datasets[2].data = [...myChart.data.datasets[2].data.slice(1), JSON.parse(e.data).heapUsed/1000];
-      myChart.data.datasets[3].data = [...myChart.data.datasets[3].data.slice(1), JSON.parse(e.data).external/1000];
-      console.log(e.data)
-      myChart.update();
-    })
-    return () => {
-      ws.close(3000, "closed");
-    };
-  }, []);
 
- 
+    ///////// INNER FUNCTION /////////
+    return function inner(parameter: string) {
+      /// Paste chart code here.
+      console.log("GOT INSIDE!");
+      const ctx = document.getElementById("myChart");
+
+      let startArray = new Array(displaySize).fill(null);
+      let rssData: number[] = [...startArray];
+      let commitHeap: number[] = [...startArray];
+      let heapUsed: number[] = [...startArray];
+      let heapTotal: number[] = [...startArray];
+      let external: number[] = [...startArray];
+
+      myChart = new chartjs.Chart(ctx, {
+        type: parameter,
+        data: {
+          labels: label,
+          datasets: [
+            {
+              label: "RSS",
+              data: [...rssData],
+              backgroundColor: [
+                "rgba(105, 0, 132, .2)",
+              ],
+              borderColor: [
+                "rgba(200, 99, 132, .7)",
+              ],
+              fill: true,
+              borderWidth: 1,
+              tension: 0.5,
+            },
+            {
+              label: "Committed Heap (kB)",
+              data: [...commitHeap],
+              backgroundColor: [
+                'rgba(0, 20, 20, .2)',
+              ],
+              borderColor: [
+                'rgba(0, 30, 20, .7)',
+              ],
+              fill: true,
+              borderWidth: 1,
+            },
+            {
+              label: "Heap Total",
+              data: [...heapTotal],
+              backgroundColor: [
+                "rgba(0, 137, 132, .2)",
+              ],
+              borderColor: [
+                "rgba(0, 10, 130, .7)",
+              ],
+              fill: true,
+              borderWidth: 1,
+            },
+            {
+              label: "Heap Used",
+              data: [...heapUsed],
+              backgroundColor: [
+                "rgba(0, 255, 0, .2)",
+              ],
+              borderColor: [
+                "rgba(0, 153, 0, .7)",
+              ],
+              fill: true,
+              borderWidth: 1,
+              tension: 0.5,
+            },
+            {
+              label: "External",
+              data: [...external],
+              backgroundColor: [
+                "rgba(255, 102, 78, .2)",
+              ],
+              borderColor: [
+                "rgba(255, 0, 127, .7)",
+              ],
+              fill: true,
+              borderWidth: 1,
+              tension: 0.5,
+            },
+          ],
+        },
+        options: {
+          scales: {
+            yAxes: {
+              suggestedmax: 6000,
+              suggestedmin: 0,
+              ticks: {
+                stepSize: 1000,
+              },
+            },
+          },
+        },
+      });
+
+      if (!socketOn) {
+        socketOn = true;
+        ws.on("message", function (e: MessageEvent) {
+          console.log("data received");
+          myChart.data.labels = myChart.data.labels.map((x) => x + 1);
+          myChart.data.datasets[0].data = [
+            ...myChart.data.datasets[0].data.slice(1),
+            JSON.parse(e.data).rss,
+          ];
+          myChart.data.datasets[1].data = [
+            ...myChart.data.datasets[1].data.slice(1),
+            JSON.parse(e.data).memory.rss / 1000,
+          ];
+          myChart.data.datasets[2].data = [
+            ...myChart.data.datasets[2].data.slice(1),
+            JSON.parse(e.data).memory.heapTotal / 1000,
+          ];
+          myChart.data.datasets[3].data = [
+            ...myChart.data.datasets[3].data.slice(1),
+            JSON.parse(e.data).memory.heapUsed / 1000,
+          ];
+          myChart.data.datasets[4].data = [
+            ...myChart.data.datasets[4].data.slice(1),
+            JSON.parse(e.data).memory.external / 1000,
+          ];
+          myChart.update("none");
+        });
+      }
+
+    };
+  }
+
+  // Function to create a new chart
+  function changeStyle(param: string) {
+    // Destroy chart and recreate a new type
+    if (myChart && param !== currentStyle) {
+      currentStyle = param;
+
+      myChart.destroy();
+    }
+    changeType(param);
+
+  }
+
+  const changeType = outer();
 
   return (
-    <div>
-      {/* <p>rss: {memory.rss}</p>
-      <p>heapTotal: {memory.heapTotal}</p>
-      <p>heapUsed: {memory.heapUsed}</p>
-      <p>external: {memory.external}</p> */}
-
-      <canvas id="myChart" width="400" height="400"></canvas>
+    <div class="block">
+      <button class='border-2 border black'
+        onClick={() => {
+          changeStyle("line");
+        }}
+      >
+        Line Graph
+      </button>
+      <button class='border-2 border black'
+        onClick={() => {
+          changeStyle("bar");
+        }}
+      >
+        Bar Graph
+      </button>
+      <canvas id="myChart"></canvas>
     </div>
   );
 }
