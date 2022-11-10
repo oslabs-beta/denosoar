@@ -9,33 +9,13 @@ interface MemoryProps {
 }
 
 export default function MemoryChart() {
-  // const [memory, setMemory] = useState({
- 
-  //   rss: 0,
-  //   heapUsed: 0,
-  //   heapTotal: 0,
-  //   external: 0,
-  // });
-  // const [data, setData] = useState();
-  // const [open, setOpen] = useState(true);
-  // const [rssData, setRssData] = useState([])
-
-  // // const rssData: number[] = []
-  // const heapUseedData: number[] = []
-  // const heapTotalData: number[] = []
-  // const externalData: number[] = []
-  // useEffect( () => {
-    
-  //   setRssData ([...rssData, memory.rss])
-  //   heapUseedData.push(memory.heapUsed)
-  //   heapTotalData.push(memory.heapTotal)
-  //   externalData.push(memory.external)
-  //   console.log(rssData)
-  // }, [memory])
+  const [style, setStyle] = useState('line')
   
-
   let myChart;
 
+  // Number of points to display on the chart
+  let displaySize = 10;
+  let updateCount = 0;
 
   useEffect(() => {
     // create ws connection with server
@@ -43,15 +23,17 @@ export default function MemoryChart() {
       "ws://127.0.0.1:3000",
     );
     const ctx = document.getElementById("myChart");
-    let rssData: number[] = [0,0,0,0,0,0,0,0,0,0]
-    let heapUsed: number[] = [0,0,0,0,0,0,0,0,0,0]
-    let heapTotal: number[] = [0,0,0,0,0,0,0,0,0,0]
-    let external: number[] = [0,0,0,0,0,0,0,0,0,0]
+
+    let startArray = new Array(displaySize).fill(0)
+    let rssData: number[] = [...startArray]
+    let heapUsed: number[] = [...startArray]
+    let heapTotal: number[] = [...startArray]
+    let external: number[] = [...startArray]
     
     myChart = new chartjs.Chart(ctx, {
-      type: "line",
+      type: style,
       data: {
-        labels: [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1],
+        labels: [],
         datasets: [
           {
           label: "RSS",
@@ -119,21 +101,25 @@ export default function MemoryChart() {
         }
       }
     });
-    setInterval(() => {
-      ws.send('message', function(){
-        console.log('give me the data');
-      });
-      console.log('hi');
-      myChart.update(0)
-    }, 1000)
+
+    ws.on('open', function(){
+      setInterval(()=>{
+        ws.send('give me data');
+      }, 1000)
+    })
     ws.on('message', function(e: MessageEvent){
       console.log('data received')
-      myChart.data.labels = myChart.data.labels.map(x => x+1);
+      myChart.data.datasets.labels = [...myChart.data.labels.slice(1), new Date()];
       myChart.data.datasets[0].data = [...myChart.data.datasets[0].data.slice(1), JSON.parse(e.data).rss/1000];
       myChart.data.datasets[1].data = [...myChart.data.datasets[1].data.slice(1), JSON.parse(e.data).heapTotal/1000];
       myChart.data.datasets[2].data = [...myChart.data.datasets[2].data.slice(1), JSON.parse(e.data).heapUsed/1000];
       myChart.data.datasets[3].data = [...myChart.data.datasets[3].data.slice(1), JSON.parse(e.data).external/1000];
-      console.log(e.data)
+
+      if (updateCount > displaySize) {
+      }
+
+      updateCount++
+
       myChart.update();
     })
     return () => {
@@ -141,15 +127,24 @@ export default function MemoryChart() {
     };
   }, []);
 
+  function changeStyle() {
+    console.log('hi')
+    setStyle( (prev: string): string => {
+      if (prev === 'bar') return 'line'
+      if (prev === 'line') return 'bar'
+    })
+    console.log(style)
+  }
+
+  useEffect( () => {
+    console.log('changed')
+  }, [style])
+
  
 
   return (
     <div>
-      {/* <p>rss: {memory.rss}</p>
-      <p>heapTotal: {memory.heapTotal}</p>
-      <p>heapUsed: {memory.heapUsed}</p>
-      <p>external: {memory.external}</p> */}
-
+      <button onClick={changeStyle}>Change the style</button>
       <canvas id="myChart" width="400" height="400"></canvas>
     </div>
   );
