@@ -1,11 +1,21 @@
 import { WebSocketClient, WebSocketServer } from "websocket";
-import { getMemory } from "../utils/memory.ts";
 
+export type MemoryElement = { 
+  rss: number, 
+  heapTotal: number,
+  heapUsed: number,
+  external: number
+}
+
+export const getMemory = (): MemoryElement => {
+  console.log(Deno.memoryUsage());
+  return Deno.memoryUsage();
+}
 export class Server {
   #ws: WebSocketServer;
   port: number;
 
-  constructor(callback: Function, port: number){
+  constructor(port: number){
     this.#ws = new WebSocketServer(port);
     this.port = port;
   }
@@ -13,7 +23,7 @@ export class Server {
   // an invokable function that streams the data
   stream(){
     this.#ws.on('connection', function(ws: WebSocketClient) {
-      ws.on('message', function(e: MessageEvent) {
+      ws.on('message', function() {
         ws.send(JSON.stringify(getMemory()));
       });
     });
@@ -24,6 +34,3 @@ export class Server {
   }
 }
 
-
-const server = new Server(getMemory, 3000);
-server.stream();
