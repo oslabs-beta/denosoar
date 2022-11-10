@@ -41,6 +41,7 @@ export default function MemoryChart() {
 
       let startArray = new Array(displaySize).fill(null);
       let rssData: number[] = [...startArray];
+      let commitHeap: number[] = [...startArray];
       let heapUsed: number[] = [...startArray];
       let heapTotal: number[] = [...startArray];
       let external: number[] = [...startArray];
@@ -62,6 +63,18 @@ export default function MemoryChart() {
               fill: true,
               borderWidth: 1,
               tension: 0.5,
+            },
+            {
+              label: "Committed Heap (kB)",
+              data: [...commitHeap],
+              backgroundColor: [
+                'rgba(0, 20, 20, .2)',
+              ],
+              borderColor: [
+                'rgba(0, 30, 20, .7)',
+              ],
+              fill: true,
+              borderWidth: 1,
             },
             {
               label: "Heap Total",
@@ -123,19 +136,23 @@ export default function MemoryChart() {
           myChart.data.labels = myChart.data.labels.map((x) => x + 1);
           myChart.data.datasets[0].data = [
             ...myChart.data.datasets[0].data.slice(1),
-            JSON.parse(e.data).rss / 1000,
+            JSON.parse(e.data).rss,
           ];
           myChart.data.datasets[1].data = [
             ...myChart.data.datasets[1].data.slice(1),
-            JSON.parse(e.data).heapTotal / 1000,
+            JSON.parse(e.data).memory.rss / 1000,
           ];
           myChart.data.datasets[2].data = [
             ...myChart.data.datasets[2].data.slice(1),
-            JSON.parse(e.data).heapUsed / 1000,
+            JSON.parse(e.data).memory.heapTotal / 1000,
           ];
           myChart.data.datasets[3].data = [
             ...myChart.data.datasets[3].data.slice(1),
-            JSON.parse(e.data).external / 1000,
+            JSON.parse(e.data).memory.heapUsed / 1000,
+          ];
+          myChart.data.datasets[4].data = [
+            ...myChart.data.datasets[4].data.slice(1),
+            JSON.parse(e.data).memory.external / 1000,
           ];
           myChart.update("none");
         });
@@ -153,6 +170,7 @@ export default function MemoryChart() {
       myChart.destroy();
     }
     changeType(param);
+
   }
 
   const changeType = outer();
