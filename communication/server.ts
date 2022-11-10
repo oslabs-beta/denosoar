@@ -1,5 +1,6 @@
 import { WebSocketClient, WebSocketServer } from "websocket";
 import { exec, OutputMode } from "exec";
+import { denoPlugin } from "https://deno.land/x/esbuild_deno_loader@0.5.2/mod.ts";
 export type MemoryElement = { 
   rss: number, 
   heapTotal: number,
@@ -25,6 +26,7 @@ export class Server {
   stream(){
     this.#ws.on('connection', function(ws: WebSocketClient) {
       ws.on('message', async function() {
+        // ps -o rss, command ${Deno.pid}
         const memStats = (await exec(`bash -c "ps -o rss,command | grep deno"`,
         {output: OutputMode.Capture}));
         console.log(Deno.pid);
