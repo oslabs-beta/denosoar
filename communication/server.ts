@@ -1,6 +1,6 @@
-import { WebSocketClient, WebSocketServer } from "websocket";
-import { exec, OutputMode } from "exec";
-import { denoPlugin } from "https://deno.land/x/esbuild_deno_loader@0.5.2/mod.ts";
+import { WebSocketClient, WebSocketServer } from "https://deno.land/x/websocket@v0.1.4/mod.ts";
+import { exec, OutputMode } from "https://deno.land/x/exec/mod.ts";
+
 export type MemoryElement = { 
   rss: number, 
   heapTotal: number,
@@ -24,18 +24,18 @@ export class Server {
 
   // an invokable function that streams the data
   stream(){
+    console.log(Deno.memoryUsage());
     this.#ws.on('connection', function(ws: WebSocketClient) {
       ws.on('message', async function() {
         // ps -o rss, command ${Deno.pid}
-        const memStats = (await exec(`bash -c "ps -o rss,command | grep deno"`,
+        const memStats = (await exec(`bash -c "ps -o rss,command ${Deno.pid}"`,
         {output: OutputMode.Capture}));
         console.log(Deno.pid);
-        console.log(memStats);
-        const rss = Number(memStats.output.split(' ')[0]); // in kB
+        const rss = Number(memStats.output.split(' ')[2]); // in kB
         ws.send(JSON.stringify({
           memory: getMemory(),
           rss: rss,
-      }));
+        }));
       });
     });
   }
