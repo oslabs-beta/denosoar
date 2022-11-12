@@ -16,15 +16,6 @@ export default function MemoryChart() {
     label.push(i - displaySize);
   }
 
-  let ws: WebSocketClient = new StandardWebSocketClient(
-    "ws://127.0.0.1:3000",
-  );
-  ws.on("open", function () {
-    setInterval(() => {
-      ws.send("give me data");
-    }, 1000);
-  });
-
   const startArray = new Array(displaySize).fill(0);
   const rssData: number[] = [...startArray];
   const commitHeap: number[] = [...startArray];
@@ -33,6 +24,14 @@ export default function MemoryChart() {
   const external: number[] = [...startArray];
 
   useEffect(() => {
+    let ws: WebSocketClient = new StandardWebSocketClient(
+      "ws://127.0.0.1:3000",
+    );
+    ws.on("open", function () {
+      setInterval(() => {
+        ws.send("give me data");
+      }, 1000);
+    });
     const ctx1 = document.getElementById("myLineChart");
     const ctx2 = document.getElementById("myBarChart");
     console.log('i am here')
@@ -247,13 +246,18 @@ export default function MemoryChart() {
       ];
       barChart.update();
     });
-    return () => {
+    // document.addEventListener('unload', async () => {
+    //   return await ws.close(1, 'closed');
+    // })
+    return async () => {
       ws.removeAllListeners();
-      ws.close(3000, 'hi');
       lineChart.destroy();
       barChart.destroy();
+      return await ws.close(1, 'closed');
     }
   }, [])
+
+  
 
   function toggleGraph(){
     const line = document.getElementById('line')?.classList.contains('hidden');
@@ -270,11 +274,11 @@ export default function MemoryChart() {
     <div class="block" id="chartContainer">
       <h1>Memory Usage</h1>
       <div id="line">
-        <button id='barBtn' onClick={toggleGraph}>Bar Chart</button>
+        <button class="" id='barBtn' onClick={toggleGraph}>Bar Chart</button>
         <canvas id="myLineChart"></canvas>
       </div>
       <div id="bar" class="hidden">
-        <button id='lineBtn' onClick={toggleGraph}>Line Chart</button>
+        <button class="" id='lineBtn' onClick={toggleGraph}>Line Chart</button>
         <canvas id="myBarChart"></canvas>
       </div>
     </div>

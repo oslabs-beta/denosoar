@@ -9,7 +9,6 @@ export type MemoryElement = {
 }
 
 export const getMemory = (): MemoryElement => {
-  console.log(Deno.memoryUsage());
   return Deno.memoryUsage();
 }
 
@@ -24,13 +23,12 @@ export class Server {
 
   // an invokable function that streams the data
   stream(){
-    console.log(Deno.memoryUsage());
     this.#ws.on('connection', function(ws: WebSocketClient) {
       ws.on('message', async function() {
+        console.log(Deno.memoryUsage());
         // ps -o rss, command ${Deno.pid}
         const memStats = (await exec(`bash -c "ps -o rss,command ${Deno.pid}"`,
         {output: OutputMode.Capture}));
-        console.log(Deno.pid);
         const rss = Number(memStats.output.split(' ')[2]); // in kB
         ws.send(JSON.stringify({
           memory: getMemory(),
