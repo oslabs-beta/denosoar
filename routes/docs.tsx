@@ -1,5 +1,5 @@
 import Header from '../components/Header.tsx';
-
+import CopyToClip from '../islands/CopyToClip.tsx';
 
 export default function Docs () {
     
@@ -44,11 +44,18 @@ export default function Docs () {
                 </p><br/>
                 <h2 class="mx-auto max-w-screen-md font-bold text-3xl">Getting started</h2>
                 <p >
-                    <ul class="mx-auto max-w-screen-md">
+                    <ul class="mx-auto max-w-screen-md ">
                         <li>list of commands to follow with GIF or CLI snippets</li>
-                        <li class = "border rounded shadow-md mx-auto box-content bg-[#0a0a0a]  text-[#7ef005] font mono  max-w-screen-md p-4 border-4 ...">
-                        deno run --allow-read --allow-env --allow-net --allow-run test/leaky.ts
-                        </li>
+
+                        <CopyToClip class = "bg-gray-300" >
+                            
+                            deno run --allow-read --allow-env --allow-net --allow-run test/leaky.ts 
+                            
+       
+                        </CopyToClip>
+                        
+                        
+                        
                     </ul>
                 </p><br/>
 
