@@ -19,11 +19,13 @@ export class Server {
   #ws: WebSocketServer;
   port: number;
   recording: boolean;
+  printed: number;
 
   constructor(port: number) {
     this.#ws = new WebSocketServer(port);
     this.port = port;
     this.recording = false;
+    this.printed = 0;
   }
 
   setRecord = () => {
@@ -64,9 +66,9 @@ export class Server {
           ws.send(JSON.stringify({
             ...decodeMem,
           }));
+          this.printed++;
+          console.log(this.printed, ":", memory)
         }
-        console.log("MEMORY", Deno.memoryUsage());
-        // ps -o rss, command ${Deno.pid}
       });
     });
   }

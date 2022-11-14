@@ -18,18 +18,13 @@ export default function MemoryChart() {
   }
 
   const startArray = new Array(displaySize).fill(0);
-  const rssData: number[] = [...startArray];
-  const commitHeap: number[] = [...startArray];
-  const heapUsed: number[] = [...startArray];
-  const heapTotal: number[] = [...startArray];
-  const external: number[] = [...startArray];
 
   const chartStyle = {
     labels: label,
     datasets: [
       {
         label: "RSS",
-        data: [...rssData],
+        data: [...startArray],
         backgroundColor: [
           "rgba(105, 0, 132, .2)",
         ],
@@ -42,7 +37,7 @@ export default function MemoryChart() {
       },
       {
         label: "Committed Heap (kB)",
-        data: [...commitHeap],
+        data: [...startArray],
         backgroundColor: [
           "rgba(0, 20, 20, .2)",
         ],
@@ -54,7 +49,7 @@ export default function MemoryChart() {
       },
       {
         label: "Heap Total",
-        data: [...heapTotal],
+        data: [...startArray],
         backgroundColor: [
           "rgba(0, 137, 132, .2)",
         ],
@@ -66,7 +61,7 @@ export default function MemoryChart() {
       },
       {
         label: "Heap Used",
-        data: [...heapUsed],
+        data: [...startArray],
         backgroundColor: [
           "rgba(0, 255, 0, .2)",
         ],
@@ -79,7 +74,7 @@ export default function MemoryChart() {
       },
       {
         label: "External",
-        data: [...external],
+        data: [...startArray],
         backgroundColor: [
           "rgba(255, 102, 78, .2)",
         ],
@@ -105,20 +100,18 @@ export default function MemoryChart() {
     },
   };
 
-  let ws: WebSocketClient;
+  const ws = new StandardWebSocketClient(
+    "ws://127.0.0.1:3000",
+  );
 
   useEffect(() => {
-    const ctx1 = document.getElementById("myLineChart");
-    const ctx2 = document.getElementById("myBarChart");
-
-    ws = new StandardWebSocketClient(
-      "ws://127.0.0.1:3000",
-    );
     ws.on("open", function () {
       setInterval(() => {
         ws.send("give me data");
       }, 1000);
     });
+    const ctx1 = document.getElementById("myLineChart");
+    const ctx2 = document.getElementById("myBarChart");
     const lineChart = new chartjs.Chart(ctx1, {
       type: "line",
       data: chartStyle,
@@ -130,52 +123,25 @@ export default function MemoryChart() {
       options: chartOptions,
     });
 
-    ws.on("message", function (e: MessageEvent) {
+    ws.addListener("message", function (e: MessageEvent) {
+      console.log('added');
       const mem = JSON.parse(e.data);
       lineChart.data.labels = lineChart.data.labels.map((x: number) => x + 1);
-      lineChart.data.datasets[0].data = [
-        ...lineChart.data.datasets[0].data.slice(1),
-        mem.rss,
-      ];
-      lineChart.data.datasets[1].data = [
-        ...lineChart.data.datasets[1].data.slice(1),
-        mem.committed / 1000,
-      ];
-      lineChart.data.datasets[2].data = [
-        ...lineChart.data.datasets[2].data.slice(1),
-        mem.heapTotal / 1000,
-      ];
-      lineChart.data.datasets[3].data = [
-        ...lineChart.data.datasets[3].data.slice(1),
-        mem.heapUsed / 1000,
-      ];
-      lineChart.data.datasets[4].data = [
-        ...lineChart.data.datasets[4].data.slice(1),
-        mem.external / 1000,
-      ];
-      lineChart.update();
-
       barChart.data.labels = barChart.data.labels.map((x: number) => x + 1);
-      barChart.data.datasets[0].data = [
-        ...barChart.data.datasets[0].data.slice(1),
-        mem.rss,
-      ];
-      barChart.data.datasets[1].data = [
-        ...barChart.data.datasets[1].data.slice(1),
-        mem.committed / 1000,
-      ];
-      barChart.data.datasets[2].data = [
-        ...barChart.data.datasets[2].data.slice(1),
-        mem.heapTotal / 1000,
-      ];
-      barChart.data.datasets[3].data = [
-        ...barChart.data.datasets[3].data.slice(1),
-        mem.heapUsed / 1000,
-      ];
-      barChart.data.datasets[4].data = [
-        ...barChart.data.datasets[4].data.slice(1),
-        mem.external / 1000,
-      ];
+      for(let i = 0; i < 5; i++){
+        console.log('here');
+        let data;
+        if(i === 0) data = mem.rss;
+        else if(i === 1) data = mem.committed/1000;
+        else if(i === 2) data = mem.heapTotal/1000;
+        else if(i === 3) data = mem.heapUsed/1000;
+        else if(i === 4) data = mem.external/1000;
+        chartStyle.datasets[i].data = [
+          ...chartStyle.datasets[i].data.slice(1),
+          data
+        ]
+      }
+      lineChart.update();
       barChart.update();
     });
 
@@ -183,7 +149,7 @@ export default function MemoryChart() {
       ws.removeAllListeners();
       lineChart.destroy();
       barChart.destroy();
-      return ws.close(1, "closed");
+      ws.close(3000, 'bye');
     };
   }, []);
 
@@ -210,7 +176,7 @@ export default function MemoryChart() {
         <button class="" id="lineBtn" onClick={toggleGraph}>Line Chart</button>
         <canvas id="myBarChart"></canvas>
       </div>
-      <RecordData />
+      <RecordData ws={ws}/>
     </div>
   );
 }
