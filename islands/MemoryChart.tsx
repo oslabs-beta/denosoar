@@ -129,7 +129,6 @@ export default function MemoryChart() {
       lineChart.data.labels = lineChart.data.labels.map((x: number) => x + 1);
       barChart.data.labels = barChart.data.labels.map((x: number) => x + 1);
       for(let i = 0; i < 5; i++){
-        console.log('here');
         let data;
         if(i === 0) data = mem.rss;
         else if(i === 1) data = mem.committed/1000;
