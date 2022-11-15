@@ -20,7 +20,7 @@ export class Server {
   port: number;
   recording: boolean;
   printed: number;
-  date?: Date
+  date: Date
 
   constructor(port: number) {
     this.#ws = new WebSocketServer(port);
@@ -41,7 +41,7 @@ export class Server {
     console.log("INSIDE TEXTFILE WIRING");
     const stringify = JSON.stringify(mem);
     const encoder = new TextEncoder();
-    const text = encoder.encode(`${new Date()}_${stringify}\n`);
+    const text = encoder.encode(`${Math.abs((new Date()).getTime() - this.date.getTime()) / 1000}_${stringify}\n`);
     Deno.writeFile(`${this.date}.txt`, text, { append: true });
   }
 
