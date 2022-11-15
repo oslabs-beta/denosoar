@@ -20,16 +20,20 @@ export class Server {
   port: number;
   recording: boolean;
   printed: number;
+  date?: Date
 
   constructor(port: number) {
     this.#ws = new WebSocketServer(port);
     this.port = port;
     this.recording = false;
     this.printed = 0;
+    this.date = new Date();
   }
 
   setRecord = () => {
-    console.log("RECORDING", this.recording);
+    if(!this.recording){
+      this.date = new Date()
+    }
     this.recording = !this.recording;
   };
 
@@ -37,8 +41,8 @@ export class Server {
     console.log("INSIDE TEXTFILE WIRING");
     const stringify = JSON.stringify(mem);
     const encoder = new TextEncoder();
-    const text = encoder.encode(stringify + "\n");
-    Deno.writeFile("hello.txt", text, { append: true });
+    const text = encoder.encode(`${new Date()}_${stringify}\n`);
+    Deno.writeFile(`${this.date}.txt`, text, { append: true });
   }
 
   // an invokable function that streams the data
