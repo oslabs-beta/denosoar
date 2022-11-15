@@ -1,5 +1,6 @@
 export default function Header() {
   return (
+    
     <div class="font-mono bg-gray-300 flex w-full justify-between p-5">
       <div class="flex items-center">
         <img
@@ -11,6 +12,8 @@ export default function Header() {
       <nav class="flex items-center">
         <a href="/">Home</a>
         <a href="/about" class="pl-8">About</a>
+        <a href="/docs" class="pl-8">Docs</a>
+
         <a
           href="https://github.com/oslabs-beta/denosoar"
           target="_blank"
