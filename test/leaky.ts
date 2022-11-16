@@ -11,6 +11,3 @@ setInterval(function (): void {
   }
 }, 1000);
 
-// initialize the memory log
-
-init();
