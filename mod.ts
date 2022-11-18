@@ -7,9 +7,8 @@ export const init = (port: number) => {
 
 switch(Deno.args[0]){
   case '--start':
-    (() => {
-      init(Number(Deno.args[1]));
-    })();
+    // open the gui
+    init(Number(Deno.args[1]));
     break;
   case '--start-recording':
     try {

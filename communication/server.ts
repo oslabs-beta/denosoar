@@ -8,9 +8,12 @@ export type MemoryElement = {
   external: number;
 };
 
+// Gets the current memory statistics on a deno application
 export const getMemory = (): MemoryElement => {
   return Deno.memoryUsage();
 };
+
+
 
 export class Server {
   port: number;
@@ -30,7 +33,6 @@ export class Server {
   }
 
   setWS = (ws: WebSocket) => {
-    console.log(ws);
     this.ws = ws;
   }
 
@@ -51,9 +53,7 @@ export class Server {
   }
 
   record(mem: MemoryElement) {
-    console.log('in record');
     if(this.recording){
-      console.log("INSIDE TEXTFILE WIRING");
       const stringify = JSON.stringify(mem);
       const encoder = new TextEncoder();
       const text = encoder.encode(`${Math.abs((new Date()).getTime() - this.date.getTime()) / 1000}_${stringify}\n`);
@@ -94,10 +94,12 @@ export class Server {
       if(!this.recording) {
         this.startRecord();
       }
+      return;
     }).get('/stop', () => {
       if(this.recording) {
         this.stopRecord();
       }
+      return;
     }).get('/recording', (ctx) => {
       ctx.response.body = this.recording;
     })
