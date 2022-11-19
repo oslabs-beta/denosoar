@@ -24,5 +24,16 @@ switch(Deno.args[0]){
     } catch(err) {
       console.log(err.message);
     }
+    break;
+  case '--freq':
+    try {
+      fetch(`http://localhost:${port}/interval`, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify(Deno.args[1])
+      });
+    } catch(err) {
+      console.log(err.message)
+    }
 }
 
