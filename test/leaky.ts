@@ -11,3 +11,4 @@ setInterval(function (): void {
   }
 }, 1000);
 
+init(3000);

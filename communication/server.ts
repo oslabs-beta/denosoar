@@ -1,3 +1,4 @@
+import { reset } from "https://deno.land/std@0.152.0/fmt/colors.ts";
 import { exec, OutputMode } from "https://deno.land/x/exec/mod.ts";
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 
@@ -19,6 +20,8 @@ export class Server {
   ws: WebSocket | null;
   app: Application;
   router: Router;
+  frequency: number;
+  interval: number;
 
   constructor(port: number) {
     this.port = port;
@@ -27,6 +30,8 @@ export class Server {
     this.ws = null;
     this.app = new Application();
     this.router = new Router();
+    this.frequency = 1000;
+    this.interval = 0;
   }
 
   setWS = (ws: WebSocket) => {
@@ -100,6 +105,16 @@ export class Server {
       }
     }).get('/recording', (ctx) => {
       ctx.response.body = this.recording;
+    }).post('/interval', async (ctx) => {
+      const num = await ctx.request.body().value;
+      this.frequency = JSON.parse(num);
+      // console.log(`Changing the sampling frequency to ${this.frequency} ms.`);
+
+      clearInterval(this.interval);
+      this.interval = setInterval(this.createData, this.frequency)
+      // console.log('new interval: ', this.interval, '. New freq: ', this.frequency)
+
+      ctx.response.status = 200;
     })
 
     this.app.addEventListener('listen', () => {
@@ -108,7 +123,7 @@ export class Server {
     this.app.use(this.router.allowedMethods());
     this.app.use(this.router.routes());
 
-    setInterval(this.createData, 1000);
+    this.interval = setInterval(this.createData, this.frequency);
 
     await this.app.listen({ port: this.port })
     console.log('Waiting for connection on port: ' + this.port);
