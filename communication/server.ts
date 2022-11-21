@@ -2,14 +2,23 @@ import { reset } from "https://deno.land/std@0.152.0/fmt/colors.ts";
 import { exec, OutputMode } from "https://deno.land/x/exec/mod.ts";
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 
-export type MemoryElement = {
+type DenoMemory = {
   rss: number;
   heapTotal: number;
   heapUsed: number;
   external: number;
 };
 
-export const getMemory = (): MemoryElement => {
+type RealMemory = {
+  rss: number;
+  heapTotal: number;
+  heapUsed: number;
+  external: number;
+  committed: number;
+}
+
+
+export const getMemory = (): DenoMemory => {
   return Deno.memoryUsage();
 };
 
@@ -22,6 +31,7 @@ export class Server {
   router: Router;
   frequency: number;
   interval: number;
+  encoder: TextEncoder;
 
   constructor(port: number) {
     this.port = port;
@@ -32,6 +42,7 @@ export class Server {
     this.router = new Router();
     this.frequency = 1000;
     this.interval = 0;
+    this.encoder = new TextEncoder();
   }
 
   setWS = (ws: WebSocket) => {
@@ -47,6 +58,7 @@ export class Server {
   startRecord = () => {
     console.log(this.recording + ' becomes ' + true)
     this.date = new Date();
+    Deno.writeFile(`${this.date}.csv`, this.encoder.encode(`x,committed,heapTotal,heapUsed,external,rss\n`))
     this.recording = true;
   }
   
@@ -55,23 +67,24 @@ export class Server {
     this.recording = false;
   }
 
-  record(mem: MemoryElement) {
+  record(mem: RealMemory) {
     console.log('in record');
     if(this.recording){
       console.log("INSIDE TEXTFILE WIRING");
-      const stringify = JSON.stringify(mem);
-      const encoder = new TextEncoder();
-      const text = encoder.encode(`${Math.abs((new Date()).getTime() - this.date.getTime()) / 1000}_${stringify}\n`);
-      Deno.writeFile(`${this.date}.txt`, text, { append: true });
+      const text = this.encoder.encode(`${Math.abs((new Date()).getTime() - this.date.getTime()) / 1000},${mem.committed/1000},${mem.heapTotal/1000},${mem.heapUsed/1000},${mem.external/1000},${mem.rss}\n`);
+      Deno.writeFile(`${this.date}.csv`, text, { append: true });
     }
   }
 
   createData = async () => {
     const memStats =
-      (await exec(`bash -c "ps -o rss,command ${Deno.pid}"`, {
+      (await exec(`bash -c "ps -o rss,vsz= -p ${Deno.pid}"`, {
         output: OutputMode.Capture,
       })); // get the current rss
-    const rss = Number(memStats.output.split(" ")[2]); // in kB
+      console.log('memStats.output', memStats.output);
+      console.log(memStats.output.split('\n')[1].trim().split(' ')[0]);
+    const rss = Number(memStats.output.split('\n')[1].trim().split(' ')[0]); // in kB
+    console.log('rss:', rss);
     const memory = getMemory(); // get the current memory
     const decodeMem = { // decode the memory
       committed: memory.rss,
