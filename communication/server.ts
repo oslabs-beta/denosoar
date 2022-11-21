@@ -1,4 +1,3 @@
-import { reset } from "https://deno.land/std@0.152.0/fmt/colors.ts";
 import { exec, OutputMode } from "https://deno.land/x/exec/mod.ts";
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 

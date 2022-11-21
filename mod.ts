@@ -1,4 +1,5 @@
 import { Server } from "./communication/server.ts"
+import hi from './util/loadTest.ts';
 
 export const init = (port: number) => {
   const server = new Server(port);
@@ -34,6 +35,13 @@ switch(Deno.args[0]){
       });
     } catch(err) {
       console.log(err.message)
+    }
+    break;
+  case '--load-test': 
+    try {
+      hi(Deno.args[1]);
+    } catch(err) {
+      console.log(err.message);
     }
 }
 
