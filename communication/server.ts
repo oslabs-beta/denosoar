@@ -21,7 +21,7 @@ export const getMemory = (): DenoMemory => {
   return Deno.memoryUsage();
 };
 
-export class Server {
+ export class Server {
   port: number;
   recording: boolean;
   date: Date;
@@ -140,4 +140,4 @@ export class Server {
     await this.app.listen({ port: this.port })
     console.log('Waiting for connection on port: ' + this.port);
   }
-}
+ }
