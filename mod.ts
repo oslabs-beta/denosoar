@@ -27,7 +27,7 @@ switch(Deno.args[0]){
     break;
   case '--freq':
     try {
-      fetch(`http://localhost:${port}/interval`, {
+      fetch(`http://localhost:${Deno.args[1]}/interval`, {
         method: 'POST',
         mode: 'no-cors',
         body: JSON.stringify(Deno.args[1])
