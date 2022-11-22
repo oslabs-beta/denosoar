@@ -4,7 +4,6 @@ export default function loadtest(url: string, concurrency: string, rps: string, 
   // const array = new Array(10).fill(url);
   // console.log(array);
 
-  const numbered = Number(concurrency);
   const n = 1000;
 
   function getRequests(url: string, concurrency: number): any[] {
@@ -13,7 +12,7 @@ export default function loadtest(url: string, concurrency: string, rps: string, 
       new Promise((resolve) => {
         const res = fetch(url);
         return resolve(res);
-      }),
+      })
     );
   }
 
