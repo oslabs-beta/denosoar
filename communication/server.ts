@@ -1,5 +1,6 @@
-import { exec, OutputMode } from "https://deno.land/x/exec/mod.ts";
+import { exec, IExecResponse, OutputMode } from "https://deno.land/x/exec/mod.ts";
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
+import { platform } from "https://deno.land/std@0.166.0/node/os.ts";
 
 type DenoMemory = {
   rss: number;
@@ -31,6 +32,7 @@ export const getMemory = (): DenoMemory => {
   frequency: number;
   interval: number;
   encoder: TextEncoder;
+  platform: string;
 
   constructor(port: number) {
     this.port = port;
@@ -42,6 +44,7 @@ export const getMemory = (): DenoMemory => {
     this.frequency = 1000;
     this.interval = 0;
     this.encoder = new TextEncoder();
+    this.platform = platform();
   }
 
   setWS = (ws: WebSocket) => {
@@ -66,7 +69,7 @@ export const getMemory = (): DenoMemory => {
     this.recording = false;
   }
 
-  record(mem: RealMemory) {
+  record = (mem: RealMemory) => {
     console.log('in record');
     if(this.recording){
       console.log("INSIDE TEXTFILE WIRING");
@@ -76,14 +79,28 @@ export const getMemory = (): DenoMemory => {
   }
 
   createData = async () => {
-    const memStats =
-      (await exec(`bash -c "ps -o rss,vsz= -p ${Deno.pid}"`, {
-        output: OutputMode.Capture,
-      })); // get the current rss
-      console.log('memStats.output', memStats.output);
-      console.log(memStats.output.split('\n')[1].trim().split(' ')[0]);
-    const rss = Number(memStats.output.split('\n')[1].trim().split(' ')[0]); // in kB
-    console.log('rss:', rss);
+    let memStats: IExecResponse;
+    let rss: number;
+    let arr: string[];
+    switch(this.platform){
+      case 'darwin': 
+        memStats = await exec(`bash -c "ps -o rss,vsz= -p ${Deno.pid}"`, {
+          output: OutputMode.Capture,
+        }); // get the current rss
+        rss = Number(memStats.output.split('\n')[1].trim().split(' ')[0]); // in kB
+        break;
+      case 'win32':
+        memStats = await exec(`wmic process where processid=${Deno.pid} get WorkingSetSize`, { 
+          output: OutputMode.Capture,
+        });
+        arr = memStats.output.split('\n');
+        rss = Number(arr[arr.length - 1]);
+        break;
+      case 'linux':
+        rss = NaN;
+        break;
+    }
+
     const memory = getMemory(); // get the current memory
     const decodeMem = { // decode the memory
       committed: memory.rss,
@@ -97,7 +114,7 @@ export const getMemory = (): DenoMemory => {
   }
 
   // an invokable function that streams the data
-  async spin() {
+  spin = async() => {
     this.router.get('/wss', (ctx) => {
       if(!ctx.isUpgradable) {
         ctx.throw(501);
@@ -120,12 +137,8 @@ export const getMemory = (): DenoMemory => {
     }).post('/interval', async (ctx) => {
       const num = await ctx.request.body().value;
       this.frequency = JSON.parse(num);
-      // console.log(`Changing the sampling frequency to ${this.frequency} ms.`);
-
       clearInterval(this.interval);
       this.interval = setInterval(this.createData, this.frequency)
-      // console.log('new interval: ', this.interval, '. New freq: ', this.frequency)
-
       ctx.response.status = 200;
     })
 
