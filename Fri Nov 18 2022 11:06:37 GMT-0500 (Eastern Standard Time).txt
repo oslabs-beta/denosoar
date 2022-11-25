@@ -1,0 +1,9 @@
+0.248_{"committed":5472256,"heapTotal":5881856,"heapUsed":5008272,"external":228,"rss":20000}
+5.459_{"committed":5472256,"heapTotal":5881856,"heapUsed":5048488,"external":323,"rss":21888}
+6.467_{"committed":5472256,"heapTotal":5881856,"heapUsed":5088724,"external":418,"rss":22096}
+7.478_{"committed":5718016,"heapTotal":5881856,"heapUsed":5128680,"external":513,"rss":22096}
+8.489_{"committed":5718016,"heapTotal":5881856,"heapUsed":5168572,"external":608,"rss":22208}
+9.503_{"committed":5718016,"heapTotal":5881856,"heapUsed":5208608,"external":703,"rss":22272}
+10.517_{"committed":5718016,"heapTotal":5881856,"heapUsed":5248500,"external":798,"rss":22352}
+11.529_{"committed":5718016,"heapTotal":5881856,"heapUsed":5288392,"external":894,"rss":22448}
+12.539_{"committed":5472256,"heapTotal":5881856,"heapUsed":4907684,"external":990,"rss":22304}
