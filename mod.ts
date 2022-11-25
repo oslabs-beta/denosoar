@@ -1,5 +1,5 @@
 import { Server } from "./communication/server.ts"
-import hi from './util/loadTest.ts';
+import loadtest from './util/loadTest.ts';
 
 export const init = (port: number) => {
   const server = new Server(port);
@@ -37,11 +37,24 @@ switch(Deno.args[0]){
       console.log(err.message)
     }
     break;
-  case '--load-test': 
+  case '--lt': 
     try {
-      hi(Deno.args[1]);
+      loadtest(Deno.args[1], Deno.args[2], Deno.args[3], Deno.args[4]);
+      // loadtest(url: string, concurrency: string, rps: string, duration:string)
     } catch(err) {
       console.log(err.message);
+    }
+    break;
+  case '--gui': 
+    try {
+      Deno.run({
+        cmd: [
+          "open",
+          "https://denosoar.deno.dev"
+        ]
+      })
+    } catch(err) {
+      console.log(err);
     }
 }
 
