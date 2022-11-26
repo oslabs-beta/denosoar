@@ -47,7 +47,7 @@ describe('Server Test', () => {
     assert(Deno.writeFile);
   })
 
-// stop recording
+
   it('Stop Recording Data', () => {
     r.stopRecord();
     assertStrictEquals(r.recording, false, 'recording stopped but recording is set still true');
