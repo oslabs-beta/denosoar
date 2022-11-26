@@ -2,7 +2,7 @@ export default function loadtest(url: string, concurrency: string, rps: string, 
 
   const n = 1000;
 
-  function getRequests(url: string, concurrency: number): any[] {
+  function getRequests(url: string, concurrency: number): Promise<Response>[] {
     return new Array(concurrency).fill(
       new Promise((resolve) => {
         const res = fetch(url);
