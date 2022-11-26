@@ -97,7 +97,11 @@ export const getMemory = (): DenoMemory => {
         rss = Number(arr[arr.length - 1]);
         break;
       case 'linux':
-        rss = NaN;
+        memStats = await exec(`bash -c "cat /proc/${Deno.pid}/status | grep VmRSS`, {
+          output: OutputMode.Capture,
+        });
+        arr = memStats.output.split(' ');
+        rss = Number(arr[arr.length - 2]);
         break;
     }
 
