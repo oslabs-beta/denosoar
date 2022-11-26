@@ -1,38 +1,24 @@
 import { exec, IExecResponse, OutputMode } from "https://deno.land/x/exec/mod.ts";
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { platform } from "https://deno.land/std@0.166.0/node/os.ts";
+import { RealMemory } from "../util/types.ts";
 
-type DenoMemory = {
-  rss: number;
-  heapTotal: number;
-  heapUsed: number;
-  external: number;
-};
-
-type RealMemory = {
-  rss: number;
-  heapTotal: number;
-  heapUsed: number;
-  external: number;
-  committed: number;
-}
-
-
-export const getMemory = (): DenoMemory => {
-  return Deno.memoryUsage();
-};
-
+/**
+ * A server that can be spun up inside any process and will mine and transmit memory data via a Websocket connection.
+ * The server contains simple endpoints that allow the user to interact with the way data is being mined/transmitted. 
+ */
  export class Server {
-  port: number;
-  recording: boolean;
-  date: Date;
-  ws: WebSocket | null;
-  app: Application;
-  router: Router;
-  frequency: number;
-  interval: number;
-  encoder: TextEncoder;
-  platform: string;
+  private port: number;
+  public recording: boolean;
+  public date: Date;
+  private ws: WebSocket | null;
+  private app: Application;
+  private router: Router;
+  private frequency: number;
+  private interval: number;
+  private encoder: TextEncoder;
+  private platform: string;
+  private controller: AbortController;
 
   constructor(port: number) {
     this.port = port;
@@ -45,73 +31,79 @@ export const getMemory = (): DenoMemory => {
     this.interval = 0;
     this.encoder = new TextEncoder();
     this.platform = platform();
+    this.controller = new AbortController();
+  }
+ 
+  /**
+   * setWS and deleteWS allow for mutable Websocket connections.
+   * The user can freely disconnect and reconnect via the GUI.
+   */
+  private setWS = (ws: WebSocket) => {
+    return this.ws = ws;
+  }
+  private deleteWS = () => {
+    return this.ws = null;
   }
 
-  setWS = (ws: WebSocket) => {
-    console.log(ws);
-    this.ws = ws;
-  }
-
-  deleteWS = () => {
-    console.log('deleted');
-    this.ws = null;
-  }
-
-  startRecord = () => {
-    console.log(this.recording + ' becomes ' + true)
+  /**
+   * stopRecord and startRecord allow the user to sample data at different times.
+   * New files will be created with the current date each time startRecord is called.
+   * Files are created in the repo where the server is initialized.
+   */
+  public startRecord = () => {
     this.date = new Date();
-    Deno.writeFile(`${this.date}.csv`, this.encoder.encode(`x,committed,heapTotal,heapUsed,external,rss\n`))
     this.recording = true;
-    return;
+    return Deno.writeFile(`${this.date}.csv`, this.encoder.encode(`x,committed,heapTotal,heapUsed,external,rss\n`))
   }
-  
-  stopRecord = () => {
-    console.log(this.recording + ' becomes ' + false)
-    this.recording = false;
+  public stopRecord = () => {
+    return this.recording = false;
   }
 
-
-  record = (mem: RealMemory) => {
-    console.log('in record');
-    if(this.recording){
-      console.log("INSIDE TEXTFILE WIRING");
-      const text = this.encoder.encode(`${Math.abs((new Date()).getTime() - this.date.getTime()) / 1000},${mem.committed/1000},${mem.heapTotal/1000},${mem.heapUsed/1000},${mem.external/1000},${mem.rss}\n`);
-      Deno.writeFile(`${this.date}.csv`, text, { append: true });
-    }
+  /**
+   * Writes the memory data to a csv file for as long as requested.
+   * CSV files can be processed on the GUI.
+   */
+  public record = (mem: RealMemory) => {
+    const text = this.encoder.encode(`${Math.abs((new Date()).getTime() - this.date.getTime()) / 1000},${mem.committed/1000},${mem.heapTotal/1000},${mem.heapUsed/1000},${mem.external/1000},${mem.rss}\n`);
+    return Deno.writeFile(`${this.date}.csv`, text, { append: true });
   }
 
-  createData = async () => {
+  /**
+   * Generate data in an OS dependent form, record/send the data if requested.
+   * Deno's memoryUsage() function generates an incorrect value for rss, so this is calculated via the terminal.
+   */
+  public createData = async () => {
     let memStats: IExecResponse;
     let rss: number;
     let arr: string[];
     switch(this.platform){
-      case 'darwin': 
+      case 'darwin': // Mac
         memStats = await exec(`bash -c "ps -o rss,vsz= -p ${Deno.pid}"`, {
           output: OutputMode.Capture,
-        }); // get the current rss
+        }); 
         rss = Number(memStats.output.split('\n')[1].trim().split(' ')[0]); // in kB
         break;
-      case 'win32':
+      case 'win32': // Windows
         memStats = await exec(`wmic process where processid=${Deno.pid} get WorkingSetSize`, { 
           output: OutputMode.Capture,
         });
         arr = memStats.output.split('\n');
-        rss = Number(arr[arr.length - 1]);
+        rss = Number(arr[arr.length - 1])/1000; // Windows generates WorkingSetSize(RSS) in bytes instead of kB
         break;
-      case 'linux':
+      case 'linux': // Linux
         memStats = await exec(`bash -c "cat /proc/${Deno.pid}/status | grep VmRSS`, {
           output: OutputMode.Capture,
         });
         arr = memStats.output.split(' ');
-        rss = Number(arr[arr.length - 2]);
+        rss = Number(arr[arr.length - 2]); // in kB
         break;
       default:
-      rss = 0;
-      break
+        rss = 0;
+        break;
     }
-    const memory = getMemory(); // get the current memory
-    const decodeMem = { // decode the memory
-      committed: memory.rss,
+    const memory = Deno.memoryUsage(); 
+    const decodeMem = { 
+      committed: memory.rss, 
       heapTotal: memory.heapTotal,
       heapUsed: memory.heapUsed,
       external: memory.external,
@@ -121,8 +113,14 @@ export const getMemory = (): DenoMemory => {
     if(this.ws) this.ws.send(JSON.stringify({ ...decodeMem }));
   }
 
-  // an invokable function that streams the data
-  spin = async () => {
+  public close = () => {
+    this.controller.abort();
+  }
+
+  /**
+   * Spins up the server and allows the user to interact with the server via simple endpoints.
+   */
+  public spin = async () => {
     this.router.get('/wss', (ctx) => {
       if(!ctx.isUpgradable) {
         ctx.throw(501);
@@ -154,10 +152,11 @@ export const getMemory = (): DenoMemory => {
 
     this.app.addEventListener('listen', () => {
       console.log(`Listening on post: ` + this.port);
-    })
+    });
     this.app.use(this.router.allowedMethods());
     this.app.use(this.router.routes());
 
+    // The server generates new data every frequency seconds. 
     this.interval = setInterval(this.createData, this.frequency);
 
     await this.app.listen({ port: this.port })
