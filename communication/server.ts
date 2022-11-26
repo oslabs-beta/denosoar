@@ -66,7 +66,7 @@ export const getMemory = (): DenoMemory => {
     this.recording = false;
   }
 
-  record(mem: RealMemory) {
+  record = (mem: RealMemory) => {
     console.log('in record');
     if(this.recording){
       console.log("INSIDE TEXTFILE WIRING");
@@ -97,7 +97,7 @@ export const getMemory = (): DenoMemory => {
   }
 
   // an invokable function that streams the data
-  async spin() {
+  spin = async () => {
     this.router.get('/wss', (ctx) => {
       if(!ctx.isUpgradable) {
         ctx.throw(501);
