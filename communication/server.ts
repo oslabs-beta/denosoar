@@ -62,6 +62,7 @@ export const getMemory = (): DenoMemory => {
     this.date = new Date();
     Deno.writeFile(`${this.date}.csv`, this.encoder.encode(`x,committed,heapTotal,heapUsed,external,rss\n`))
     this.recording = true;
+    return;
   }
   
   stopRecord = () => {
@@ -131,10 +132,12 @@ export const getMemory = (): DenoMemory => {
         ws.onclose = () => this.deleteWS();
         ws.onerror = (e) => console.log(e);
       }
-    }).get('/start', () => {
+    }).get('/start', (ctx) => {
       if(!this.recording) {
         this.startRecord();
       }
+      ctx.response.status = 200
+      return ctx.response.status;
     }).get('/stop', () => {
       if(this.recording) {
         this.stopRecord();
