@@ -69,6 +69,7 @@ export const getMemory = (): DenoMemory => {
     this.recording = false;
   }
 
+
   record = (mem: RealMemory) => {
     console.log('in record');
     if(this.recording){
@@ -103,8 +104,10 @@ export const getMemory = (): DenoMemory => {
         arr = memStats.output.split(' ');
         rss = Number(arr[arr.length - 2]);
         break;
+      default:
+      rss = 0;
+      break
     }
-
     const memory = getMemory(); // get the current memory
     const decodeMem = { // decode the memory
       committed: memory.rss,
@@ -118,7 +121,7 @@ export const getMemory = (): DenoMemory => {
   }
 
   // an invokable function that streams the data
-  spin = async() => {
+  spin = async () => {
     this.router.get('/wss', (ctx) => {
       if(!ctx.isUpgradable) {
         ctx.throw(501);
