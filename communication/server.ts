@@ -150,9 +150,6 @@ import { RealMemory } from "../util/types.ts";
       ctx.response.status = 200;
     })
 
-    this.app.addEventListener('listen', () => {
-      console.log(`Listening on post: ` + this.port);
-    });
     this.app.use(this.router.allowedMethods());
     this.app.use(this.router.routes());
 
