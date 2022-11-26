@@ -4,6 +4,11 @@
   },
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "preact"
+    "jsxImportSource": "preact",
+    "lib": [
+      "dom",
+      "deno.ns",
+      "deno.unstable"
+    ]
   }
 }
