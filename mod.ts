@@ -7,10 +7,8 @@ export const init = (port: number) => {
 }
 
 switch(Deno.args[0]){
-  case '--start':
-    (() => {
-      init(Number(Deno.args[1]));
-    })();
+  case '--example':
+    (()=>init(Number(Deno.args[1])))();
     break;
   case '--start-recording':
     try {
@@ -57,4 +55,3 @@ switch(Deno.args[0]){
       console.log(err);
     }
 }
-
