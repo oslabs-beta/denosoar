@@ -11,7 +11,7 @@ To get started with Denosoar, execute the following command in the terminal.
 This command will give you access to Denosoar's CLI command suite. 
 
 ## Tutorial
-////// DENOSOAR EXAMPLE NEEDS TO BE LOOKED AT //////
+
 Now that you have the CLI tools installed, a quick example has been provided to try out denosoar via the command line. Simply execute: 
 
     denosoar --example
