@@ -90,7 +90,7 @@ You should see an increase in the heap and rss statistics on the live graph.
 
 Now that you've downloaded the CLI functionality and made it through the tutorial, let's move on to your project. In your entrypoint server file, add the following import: 
 
-    import { init } as denosoar from "https://deno.land/x/denosoar@v0.0.3/mod.ts";
+    import { init } as denosoar from "https://deno.land/x/denosoar@v0.0.4/mod.ts";
     
 init() is a function accepting one parameter, an unused port to which our server will stream memory data directly from your process. Invoke init(port: number) and the server will be spun up in your application and being generating data. The default frequency for data generation is 10 seconds. 
 
