@@ -6,7 +6,8 @@ export const init = (port: number) => {
   server.spin();  
 }
 
-switch(Deno.args[0]){
+if(Deno.args.length > 0){
+  switch(Deno.args[0]){
   case '--example':
     (()=>init(3000))();
     break;
@@ -78,4 +79,6 @@ switch(Deno.args[0]){
     break;
   default: 
     console.error('Not a valid command. Type denosoar --help for help.');
+}
+
 }
