@@ -1,5 +1,5 @@
-import { exec, IExecResponse, OutputMode } from "https://deno.land/x/exec/mod.ts";
-import { Application, Router } from "https://deno.land/x/oak/mod.ts";
+import { exec, IExecResponse, OutputMode } from "https://deno.land/x/exec@0.0.5/mod.ts";
+import { Application, Router } from "https://deno.land/x/oak@v11.1.0/mod.ts";
 import { platform } from "https://deno.land/std@0.166.0/node/os.ts";
 import { RealMemory } from "../util/types.ts";
 
