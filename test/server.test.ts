@@ -1,9 +1,7 @@
-import { assertExists, assertEquals, assertNotEquals, assertStrictEquals, assert } from "https://deno.land/std@0.165.0/testing/asserts.ts";
+import { assertExists, assertNotEquals, assertStrictEquals, assert } from "https://deno.land/std@0.165.0/testing/asserts.ts";
 import { exec, OutputMode } from "https://deno.land/x/exec/mod.ts";
 import { describe, it } from "https://deno.land/std@0.166.0/testing/bdd.ts";
 import { Server }  from '../communication/server.ts';
-// import { delay } from "https://deno.land/std@0.165.0/async/delay.ts";
-
 
 describe('Server Test', () => {
   const r = new Server(3000);
