@@ -72,24 +72,28 @@ For the example, this will be:
     
     denosoar --stop-recording 3000
    
-
 ## Load Test 
+
+Our load testing tool is in very early beta stages. Right now, it can deliver a large number of concurrent GET requests to your endpoint. In our use case, the load tester is designed to strain your system to help identify memory leaks. It is not a fully functioning load tester. To use a more complex and customizable load testing tool, please look up Siege, wrk, or another tool that is compatible with your set up.
 
 To initialize a load test, you can either navigate to the GUI and utilize the load testing section of the Home page. Or, you can type the following command: 
 
     denosoar --lt url concurrency rps duration
     
--- this needs work
-
 Let's try it. Make sure the example is listening on port 3000 and type the following command into the terminal: 
 
     denosoar --lt https://localhost:3000 1000 1000 
 
+You should see an increase in the heap and rss statistics on the live graph.
 
 ## Initializing Denosoar
 
 Now that you've downloaded the CLI functionality and made it through the tutorial, let's move on to your project. In your entrypoint server file, add the following import: 
 
-    import { init } as denosoar from "https://deno.land/x/denosoar@v0.0.2/mod.ts";
+    import { init } as denosoar from "https://deno.land/x/denosoar@v0.0.3/mod.ts";
     
 init() is a function accepting one parameter, an unused port to which our server will stream memory data directly from your process. Invoke init(port: number) and the server will be spun up in your application and being generating data. The default frequency for data generation is 10 seconds. 
+
+When you start your server, you can then navigate to the GUI and type in the port that you passed into the init invocation. You should immediately see data generated on the live graph. If you receive an error, it's likely that your ports do not match.
+
+Please see the GUI readme and Docs page for more information.

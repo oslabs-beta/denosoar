@@ -12,19 +12,25 @@ switch(Deno.args[0]){
     break;
   case '--start-recording':
     try {
-      fetch(`http://localhost:${Deno.args[1]}/start`);
+      if(!Deno.args[1] || !Deno.args[2]) throw new Error('You must use the following command template:\n\n denosoar --freq port desired-frequency(number)');
+      await fetch(`http://localhost:${Deno.args[1]}/start`)
     } catch (err) {
-      console.log(err.message);
+      console.error('Error: Tried to connect to port ' + Deno.args[1] + ' but something went wrong. Please try again.');
+      console.error('Error:', err);
     }
     break;
   case '--stop-recording': 
+    if(!Deno.args[1] || !Deno.args[2]) throw new Error('You must use the following command template:\n\n denosoar --freq port desired-frequency(number)');
     try {
-      fetch(`http://localhost:${Deno.args[1]}/stop`)
+      await fetch(`http://localhost:${Deno.args[1]}/stop`)
     } catch(err) {
-      console.log(err.message);
+      console.error('Error: Tried to connect to port ' + Deno.args[1] + ' but something went wrong. Please try again.');
+      console.error('Error:', err);
     }
     break;
   case '--freq':
+    if(!Deno.args[1] || !Deno.args[2]) throw new Error('You must use the following command template:\n\n denosoar --freq port desired-frequency(number)');
+    if(Number(Deno.args[2]) === NaN) throw new Error('Frequency must be a number.')
     try {
       fetch(`http://localhost:${Deno.args[1]}/interval`, {
         method: 'POST',
@@ -32,15 +38,18 @@ switch(Deno.args[0]){
         body: JSON.stringify(Deno.args[2])
       });
     } catch(err) {
-      console.log(err.message)
+      console.error('Error: Tried to connect to port ' + Deno.args[1] + ' but something went wrong. Please try again.');
+      console.error('Error:', err);
     }
     break;
   case '--lt': 
+    if(Deno.args.length !== 5) throw new Error('Error: You must use the following command template:\n\n denosoar --lt url(string) concurrency(number) rps(number) duration(number)');
+    if(Number(Deno.args[2]) === NaN || Number(Deno.args[3]) === NaN || Number(Deno.args[4]) === NaN) throw new Error('Error: The last three arguments must be numbers.')
     try {
       loadtest(Deno.args[1], Deno.args[2], Deno.args[3], Deno.args[4]);
-      // loadtest(url: string, concurrency: string, rps: string, duration:string)
     } catch(err) {
-      console.log(err.message);
+      console.error('Error: Tried to connect to port ' + Deno.args[1] + ' but something went wrong. Please try again.');
+      console.error('Error:', err);
     }
     break;
   case '--gui': 
@@ -52,6 +61,21 @@ switch(Deno.args[0]){
         ]
       })
     } catch(err) {
-      console.log(err);
+      console.error('Error: Something went wrong.');
     }
+    break;
+  case '--help': 
+    console.log(`
+      commands: 
+
+      --example: start the example
+      --start-recording <port #>: start recording a .csv file in the denosoar server listening at this port
+      --stop-recording <port #>: stop recording the .csv file in the denosoar server listening at this port
+      --freq <port #> <desired-frequency>: change the frequency of data collection in the denosoar server listening at this port
+      --lt <url> <concurrency> <rps> <duration>: utilize our beta version load testing tool - please report issues via github
+      --gui: open the gui 
+    `)
+    break;
+  default: 
+    console.error('Not a valid command. Type denosoar --help for help.');
 }
