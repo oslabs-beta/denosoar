@@ -6,7 +6,7 @@ Welcome to Denosoar, a first of it's kind live memory tracking and load testing 
 
 To get started with Denosoar, execute the following command in the terminal. 
 
-    deno install --allow-read --allow-write --allow-net --allow-env --allow-run --name denosoar https://deno.land/x/denosoar@v0.0.3/mod.ts
+    deno install --allow-read --allow-write --allow-net --allow-env --allow-run --name denosoar https://deno.land/x/denosoar@v1.0.0/mod.ts
     
 This command will give access to Denosoars' CLI command suite. 
 
@@ -31,13 +31,13 @@ The memory graph will begin to generate live data. Always make sure that the por
 
 ## Changing the Sampling Frequency 
 
-The sampling frequency will default to 10 seconds. To change the sampling frequency, either use the GUI or the command line. For our example, execute the following command: 
+The sampling frequency will default to report one memory snapshot per second. To change the sampling frequency, either use the GUI or the command line. For our example, execute the following command: 
 
-    denosoar --freq 3000 20
+    denosoar --freq 3000 2000
     
-The command will change the frequency for the Denosoar server that is listening on 3000 to one data collection every 20 seconds. The command template is as follows: 
+The command will change the frequency for the Denosoar server that is listening on 3000 to one data collection every 2000 milliseconds (2 seconds). The command template is as follows: 
 
-    denosoar --freq port-number seconds-between-data-collection
+    denosoar --freq port-number milliseconds-between-data-collection
     
 The command will fail if you have not initialized a Denosoar server on an application to the port you are accessing. 
 
@@ -81,15 +81,16 @@ To initialize a load test, you can either navigate to the GUI and utilize the lo
     
 Let's try it. Make sure the example is listening on port 3000 and type the following command into the terminal: 
 
-    denosoar --lt https://localhost:3000 1000 1000 
-
+    denosoar --lt https://localhost:3000 1000 20 10000
+    
+This would effectively result in sending 1,000 concurrent requests, 20 times per second, for 10 seconds. (*1,000 x 20 x 10* = 20,000 GET Requests)
 You should see an increase in the heap and rss statistics on the live graph.
 
 ## Initializing Denosoar
 
 Now that you've downloaded the CLI functionality and made it through the tutorial, let us move on to your project. In your entrypoint server file, add the following import: 
 
-    import { init } as denosoar from "https://deno.land/x/denosoar@v0.0.3/mod.ts";
+    import { init } as denosoar from "https://deno.land/x/denosoar@v1.0.0/mod.ts";
     
 init() is a function that accepts one parameter, an unused port to which our server will stream memory data directly from your process. Invoke init(port: number) and the server will be spun up in your application and begin generating data. The default frequency for data generation is 10 seconds. 
 
