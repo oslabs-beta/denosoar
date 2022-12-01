@@ -1,0 +1,14 @@
+{
+  "tasks": {
+    "start": "deno run -A --watch=static/,routes/ dev.ts"
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "lib": [
+      "dom",
+      "deno.ns",
+      "deno.unstable"
+    ]
+  }
+}
