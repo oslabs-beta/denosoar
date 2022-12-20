@@ -82,7 +82,7 @@ To initialize a load test, you can either navigate to the GUI and utilize the lo
     
 Let's try it. Make sure the example is listening on port 3000 and type the following command into the terminal: 
 
-    denosoar --lt https://localhost:3000 1000 1000 
+    denosoar --lt https://localhost:3000 1000 1000 20
 
 You should see an increase in the heap and rss statistics on the live graph.
 

@@ -9,8 +9,8 @@ import { RealMemory } from "../util/types.ts";
  */
  export class Server {
   private port: number;
-  public recording: boolean;
-  public date: Date;
+  private recording: boolean;
+  private date: Date;
   private ws: WebSocket | null;
   private app: Application;
   private router: Router;
