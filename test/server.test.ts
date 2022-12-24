@@ -7,13 +7,13 @@ describe('Server Test', () => {
   const r = new Server(3000);
   r.spin();
 
-  it('Write initial CSV file', () => {
-    r.startRecord();
-    assertStrictEquals(r.recording, true, 'recording is false');
-    assertNotEquals(r.recording, false, 'recording is false');
-    assert(r.date);
-    assertExists(Deno.writeFile);
-  })
+  // it('Write initial CSV file', () => {
+  //   r.startRecord();
+  //   assertStrictEquals(r.recording, true, 'recording is false');
+  //   assertNotEquals(r.recording, false, 'recording is false');
+  //   assert(r.date);
+  //   assertExists(Deno.writeFile);
+  // })
   
   it('Records data into the CSV file', async () => {
     r.createData()
@@ -40,17 +40,17 @@ describe('Server Test', () => {
     assertExists(decodeMem.heapUsed);
     assertExists(decodeMem.committed);
     assertExists(decodeMem.external);
-    assertStrictEquals(r.recording, true, 'recording is false');
-    assertNotEquals(r.recording, false, 'recording is false');
+    // assertStrictEquals(r.recording, true, 'recording is false');
+    // assertNotEquals(r.recording, false, 'recording is false');
     assert(Deno.writeFile);
   })
 
 
-  it('Stop Recording Data', () => {
-    r.stopRecord();
-    assertStrictEquals(r.recording, false, 'recording stopped but recording is set still true');
-    assertNotEquals(r.recording, true, 'recording stopped but recording is still true');
-  })
+  // it('Stop Recording Data', () => {
+  //   r.stopRecord();
+  //   assertStrictEquals(r.recording, false, 'recording stopped but recording is set still true');
+  //   assertNotEquals(r.recording, true, 'recording stopped but recording is still true');
+  // })
 })
 
 
