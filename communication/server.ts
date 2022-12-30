@@ -143,6 +143,7 @@ import { RealMemory } from "../util/types.ts";
     }).get('/recording', (ctx) => {
       ctx.response.body = this.recording;
     }).post('/interval', async (ctx) => {
+      console.log('here');
       const num = await ctx.request.body().value;
       this.frequency = JSON.parse(num);
       clearInterval(this.interval);
