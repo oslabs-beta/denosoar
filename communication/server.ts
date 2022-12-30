@@ -27,7 +27,7 @@ import { RealMemory } from "../util/types.ts";
     this.ws = null;
     this.app = new Application();
     this.router = new Router();
-    this.frequency = 1000;
+    this.frequency = 15000;
     this.interval = 0;
     this.encoder = new TextEncoder();
     this.platform = platform();
