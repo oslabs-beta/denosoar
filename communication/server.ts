@@ -120,12 +120,7 @@ import { RealMemory } from "../util/types.ts";
    * Heap Snapshot.
    */
 
-  // New endpoint to capture heap snapshot
-  public captureHeapSnapshot = async (ctx: any) => {
-    const snapshot = await Deno.writeHeapSnapshot();
-    ctx.response.headers.set("Content-Disposition", "attachment; filename=heap_snapshot.heapsnapshot");
-    ctx.response.body = snapshot;
-  }
+
 
   /**
    * Spins up the server and allows the user to interact with the server via simple endpoints.
@@ -166,8 +161,7 @@ import { RealMemory } from "../util/types.ts";
 
     // The server generates new data every frequency seconds. 
     this.interval = setInterval(this.createData, this.frequency);
-        // New endpoint to capture heap snapshot
-    this.router.get('/snapshot', this.captureHeapSnapshot);
+
 
     await this.app.listen({ port: this.port })
     console.log('Waiting for connection on port: ' + this.port);
